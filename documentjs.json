@@ -1,0 +1,14 @@
+{
+  "sites": {
+    "docs": {
+      "dest": "docs",
+      "parent": "can-define-list-sort",
+      "pageConfig": {
+        "page": "docs"
+      },
+      "glob": {
+        "pattern": "./**/*.{js,md}"
+      }
+    }
+  }
+}
