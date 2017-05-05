@@ -441,10 +441,7 @@ QUnit.skip("sorting works with comparator added after a binding", function(){
 
 });
 
-/*
-  no removeAttr on can-define-list, not sure how to remove comparator
-*/
-QUnit.skip("removing comparator tears down bubbling", function(){
+test("removing comparator tears down bubbling", function(){
 
 	var heroes = new DefineList([ { id: 1, name: 'Superman'}, { id: 2, name: 'Batman'} ]);
 	var lengthHandler = function(){};
@@ -455,7 +452,7 @@ QUnit.skip("removing comparator tears down bubbling", function(){
 	heroes.set('comparator', 'id');
 
 	/* how do we remove attrs from a define list? */
-	heroes.removeAttr('comparator');
+	heroes.set('comparator', undefined);
 
 	ok(heroes.__bindEvents._lifecycleBindings, "list has bindings");
 	ok(heroes[0].__bindEvents._lifecycleBindings, "item has bindings");

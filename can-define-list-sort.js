@@ -23,6 +23,7 @@ assign(proto, {
     return this;
 	},
 	comparatorEventHandler () {
+    var defineList = this;
     // setting this flag in case someone pushes without
     // calling sort or setting comparator
     shouldSort = true;
@@ -31,37 +32,38 @@ assign(proto, {
 			comparatorSetup = true;
 			// set up bindings for each item if 
       // it is a define map
-			this.each(item => {
+			this.each(function(item) {
 				if(typeof item !== 'object'){
 					return;
 				}
-				if (this.comparator && typeof this.comparator === 'string') {
-					item.on(this.comparator, this._createMoveEvent.bind(this));
+				if (defineList.comparator && typeof defineList.comparator === 'string') {
+					item.on(defineList.comparator, defineList._createMoveEvent.bind(defineList));
 				}
 			});
 		} else if (!this.comparator) {
 			// if there is no comparator remove binding
-			this.each(item => {
+      var defineList = this;
+			this.each(function(item) {
         if(typeof item !== 'object') {
           return;
         }
 				if(lastComparator && typeof lastComparator === 'string'){
-					item.off(lastComparator, this._createMoveEvent);
+					item.off(lastComparator, defineList._createMoveEvent);
 				}
 			});
 			comparatorSetup = false;
 		} else {
 			// if there is a comparator change remove the old bindings 
 			// and add the new one
-			this.each(item => {
+			this.each(function(item) {
 				if(typeof item !== 'object') {
 					return;
 				}
 				if(lastComparator && typeof lastComparator === 'string'){
-					item.off(lastComparator, this._createMoveEvent);
+					item.off(lastComparator, defineList._createMoveEvent);
 				}
-				if(typeof this.comparator === 'string') {
-					item.on(this.comparator, this._createMoveEvent.bind(this));
+				if(typeof defineList.comparator === 'string') {
+					item.on(defineList.comparator, defineList._createMoveEvent.bind(defineList));
 				}
 			});
 		}	
