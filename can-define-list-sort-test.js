@@ -3,6 +3,7 @@ var DefineMap = require("can-define/map/map");
 var stache = require("can-stache");
 var canBatch = require("can-event/batch/batch");
 var QUnit = require("steal-qunit");
+var each = require("can-util/js/each/each");
 
 require("can-define-list-sort");
 
@@ -318,40 +319,44 @@ function renderedTests (templateEngine, helperType, renderer) {
 
 	});
 
-	// test('Move DOM items when list is sorted with  ' + templateEngine + ' using the ' + helperType +' helper', function () {
-	// 	var el = document.createElement('div');
+  /* 
+    this test is not passing, I believe it is tied to issue #1566
+   */
 
-	// 	var items = new DefineList([
-	// 		{ id: 4 },
-	// 		{ id: 1 },
-	// 		{ id: 6 },
-	// 		{ id: 3 },
-	// 		{ id: 2 },
-	// 		{ id: 8 },
-	// 		{ id: 0 },
-	// 		{ id: 5 },
-	// 		{ id: 6 },
-	// 		{ id: 9 },
-	// 	]);
+	QUnit.skip('Move DOM items when list is sorted with  ' + templateEngine + ' using the ' + helperType +' helper', function () {
+		var el = document.createElement('div');
 
-	// 	// Render the template and place inside the <div>
-	// 	el.appendChild(renderer({
-	// 		items: items
-	// 	}));
+		var items = new DefineList([
+			{ id: 4 },
+			{ id: 1 },
+			{ id: 6 },
+			{ id: 3 },
+			{ id: 2 },
+			{ id: 8 },
+			{ id: 0 },
+			{ id: 5 },
+			{ id: 6 },
+			{ id: 9 },
+		]);
 
-	// 	var firstElText = el.querySelector('li').firstChild.data;
+		// Render the template and place inside the <div>
+		el.appendChild(renderer({
+			items: items
+		}));
 
-	// 	// Check that the "4" is at the beginning of the list
-	// 	equal(firstElText, 4, 'First LI is a "4"');
+		var firstElText = el.querySelector('li').firstChild.data;
 
-	// 	// Sort the list in-place
-	// 	items.set('comparator' , 'id');
-	// 	firstElText = el.querySelector('li').firstChild.data;
+		// Check that the "4" is at the beginning of the list
+		equal(firstElText, 4, 'First LI is a "4"');
 
-	// 	equal(firstElText, 0, 'The `0` was moved to beginning of the list' +
-	// 		'once sorted.');
+		// Sort the list in-place
+		items.set('comparator' , 'id');
+		firstElText = el.querySelector('li').firstChild.data;
 
-	// });
+		equal(firstElText, 0, 'The `0` was moved to beginning of the list' +
+			'once sorted.');
+
+	});
 
 	test('Push multiple items with ' + templateEngine + ' using the ' + helperType +' helper (#1509)', function () {
 		var el = document.createElement('div');
@@ -389,73 +394,80 @@ var eachHelperTemplate = '<ul>{{#each items}}<li>{{id}}</li>{{/each}}</ul>';
 renderedTests('Stache', '{{#block}}', stache(blockHelperTemplate));
 renderedTests('Stache', '{{#each}}', stache(eachHelperTemplate));
 
-// test("sorting works with #each (#1566)", function(){
+/* 
+  the following two tests are not working. I believe it is tied to the original issue #1566 and 
+  how nodelists work with can-define-list
+*/
+QUnit.skip("sorting works with #each (#1566)", function(){
 
-// 	var heroes = new DefineList([ { id: 1, name: 'Superman'}, { id: 2, name: 'Batman'} ]);
+	var heroes = new DefineList([ { id: 1, name: 'Superman'}, { id: 2, name: 'Batman'} ]);
 
-// 	heroes.attr('comparator', 'name');
+	heroes.attr('comparator', 'name');
 
-// 	var template = stache("<ul>\n{{#each heroes}}\n<li>{{id}}-{{name}}</li>\n{{/each}}</ul>");
+	var template = stache("<ul>\n{{#each heroes}}\n<li>{{id}}-{{name}}</li>\n{{/each}}</ul>");
 
-// 	var frag = template({
-// 		heroes: heroes
-// 	});
+	var frag = template({
+		heroes: heroes
+	});
 
-// 	var lis = frag.childNodes[0].getElementsByTagName("li");
+	var lis = frag.childNodes[0].getElementsByTagName("li");
 
-// 	equal(lis[0].innerHTML, "2-Batman");
-// 	equal(lis[1].innerHTML, "1-Superman");
+	equal(lis[0].innerHTML, "2-Batman");
+	equal(lis[1].innerHTML, "1-Superman");
 
-// 	heroes.attr('comparator', 'id');
+	heroes.attr('comparator', 'id');
 
-// 	equal(lis[0].innerHTML, "1-Superman");
-// 	equal(lis[1].innerHTML, "2-Batman");
-// });
+	equal(lis[0].innerHTML, "1-Superman");
+	equal(lis[1].innerHTML, "2-Batman");
+});
 
-// test("sorting works with comparator added after a binding", function(){
-// 	var heroes = new DefineList([ { id: 1, name: 'Superman'}, { id: 2, name: 'Batman'} ]);
+QUnit.skip("sorting works with comparator added after a binding", function(){
+	var heroes = new DefineList([ { id: 1, name: 'Superman'}, { id: 2, name: 'Batman'} ]);
 
-// 	var template = stache("<ul>\n{{#each heroes}}\n<li>{{id}}-{{name}}</li>\n{{/each}}</ul>");
+	var template = stache("<ul>\n{{#each heroes}}\n<li>{{id}}-{{name}}</li>\n{{/each}}</ul>");
 
-// 	var frag = template({
-// 		heroes: heroes
-// 	});
+	var frag = template({
+		heroes: heroes
+	});
 
-// 	heroes.set('comparator', 'id');
+	heroes.set('comparator', 'id');
 
-// 	heroes.set("0.id",3);
+	heroes.set("0.id",3);
 
-// 	var lis = frag.childNodes[0].getElementsByTagName("li");
+	var lis = frag.childNodes[0].getElementsByTagName("li");
 
-// 	equal(lis[0].innerHTML, "2-Batman");
-// 	equal(lis[1].innerHTML, "3-Superman");
+	equal(lis[0].innerHTML, "2-Batman");
+	equal(lis[1].innerHTML, "3-Superman");
 
-// });
+});
 
-// test("removing comparator tears down bubbling", function(){
+/*
+  no removeAttr on can-define-list, not sure how to remove comparator
+*/
+QUnit.skip("removing comparator tears down bubbling", function(){
 
-// 	var heroes = new DefineList([ { id: 1, name: 'Superman'}, { id: 2, name: 'Batman'} ]);
-// 	var lengthHandler = function(){};
+	var heroes = new DefineList([ { id: 1, name: 'Superman'}, { id: 2, name: 'Batman'} ]);
+	var lengthHandler = function(){};
 
-// 	heroes.bind("length",lengthHandler);
+	heroes.bind("length",lengthHandler);
 
-// 	ok(!heroes[0].__bindEvents._lifecycleBindings, "item has no bindings");
-// 	heroes.set('comparator', 'id');
+	ok(!heroes[0].__bindEvents._lifecycleBindings, "item has no bindings");
+	heroes.set('comparator', 'id');
 
-// 	/* how do we remove attrs from a define list? */
-// 	heroes.removeAttr('comparator');
+	/* how do we remove attrs from a define list? */
+	heroes.removeAttr('comparator');
 
-// 	ok(heroes.__bindEvents._lifecycleBindings, "list has bindings");
-// 	ok(heroes[0].__bindEvents._lifecycleBindings, "item has bindings");
+	ok(heroes.__bindEvents._lifecycleBindings, "list has bindings");
+	ok(heroes[0].__bindEvents._lifecycleBindings, "item has bindings");
 
-// 	heroes.set('comparator', null);
+	heroes.set('comparator', null);
 
-// 	ok(!heroes[0].__bindEvents._lifecycleBindings, "item has no bindings");
-// 	ok(heroes.__bindEvents._lifecycleBindings, "list has bindings");
+	ok(!heroes[0].__bindEvents._lifecycleBindings, "item has no bindings");
+	ok(heroes.__bindEvents._lifecycleBindings, "list has bindings");
 
-// 	heroes.unbind("length",lengthHandler);
-// 	ok(!heroes.__bindEvents._lifecycleBindings, "list has no bindings");
-// });
+	heroes.unbind("length",lengthHandler);
+	ok(!heroes.__bindEvents._lifecycleBindings, "list has no bindings");
+});
 
 test('sorting works when returning any negative value (#1601)', function() {
 	var list = new DefineList([1, 4, 2]);
@@ -483,6 +495,9 @@ test('Batched events originating from sort plugin lack batchNum (#1707)', functi
 	canBatch.stop();
 });
 
+// this test pased, but not sure how to translate it for DefineList
+// can-define-list-sort does not currenly implement
+// ._getReelativeInsertIndex, or ._changes
 test('The sort plugin\'s _change handler ignores batched _changes (#1706)', function () {
 	var list = new DefineList();
 	var _getRelativeInsertIndex = list._getRelativeInsertIndex;
@@ -508,4 +523,251 @@ test('The sort plugin\'s _change handler ignores batched _changes (#1706)', func
 	canBatch.stop();
 
 	equal(list[2].id, 'c', 'List was sorted');
+});
+
+test('Items aren\'t unecessarily swapped to the end of a list of equal items (#1705)', function () {
+	var list = new DefineList([
+		{ id: 'a', index: 1 },
+		{ id: 'b', index: 2 },
+		{ id: 'c', index: 3 }
+	]);
+	list.set('comparator', 'id');
+	list.bind('move', function () {
+		ok(false, 'No "move" events should be fired');
+	});
+
+	list[0].id = 'b';
+	equal(list[0].index, 1, 'Item hasn\'t moved');
+
+	ok(true, 'unecessary \'move\' event was prevented');
+});
+
+test('Items aren\'t unecessarily swapped to the beginning of a list of equal items (#1705)', function () {
+	var list = new DefineList([
+		{ id: 'a', index: 1 },
+		{ id: 'b', index: 2 },
+		{ id: 'c', index: 3 }
+	]);
+	list.set('comparator', 'id');
+	list.bind('move', function () {
+		ok(false, 'No "move" events should be fired');
+	});
+
+	list[2].id = 'b';
+	equal(list[2].index, 3, 'Item hasn\'t moved');
+
+	ok(true, 'an unecessary \'move\' event was prevented');
+});
+
+test('Insert index is not evaluted for irrelevant changes', function () {
+	var list = new DefineList([
+		{
+			id: 'a',
+			index: 1
+		},
+		{
+			id: 'b',
+			index: 2,
+			child: {
+				grandchild: {
+					id: 'c',
+					index: 3
+				}
+			}
+		}
+	]);
+
+	// Setup
+	list.bind('move', function () {
+		ok(false, 'No "move" events should be fired');
+	});
+
+	list.set('comparator', 'id');
+
+	// Start test
+	list[0].index = 4;
+	list.set('comparator', 'child.grandchild.id');
+	list[1].child.grandchild.index = 4;
+
+	list[1].child = {
+		grandchild: {
+			id: 'c',
+			index: 4
+		}
+	};
+
+	equal(list[0].id, 'a', 'Item not moved');
+});
+
+test('items are positioned correctly', function () {
+	var letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+	var alphabet = letters.split('');
+	var expected = alphabet.slice(0);
+	var sorted = new DefineList(alphabet);
+
+	// Enable the sort plugin
+	sorted.sort();
+	// There are some gotcha's that we can't compare to native sort:
+	// http://blog.rodneyrehm.de/archives/14-Sorting-Were-Doing-It-Wrong.html
+	var samples = ['0A','ZZ','**','LM','LL','Josh','James','Juan','Julia',
+		'!!HOORAY!!'];
+
+	each(samples, function (value) {
+		expected.push(value);
+		expected.sort();
+		sorted.push(value);
+
+		each(expected, function (value, index) {
+			equal(value, sorted[index],
+				'Sort plugin output matches native output');
+		});
+	});
+});
+
+/* not sure how to test this or if it should be tested
+  when using set on init it created an array with 
+  [comparator, isPrimary]
+ */
+QUnit.skip('set comparator on init', function() {
+	var Item = DefineMap.extend();
+	Item.List = DefineList.extend({
+		init: function() {
+			this.set('comparator', 'isPrimary');
+		}
+	});
+
+	var items = [
+		{ isPrimary: false },
+		{ isPrimary: true },
+		{ isPrimary: false }
+	];
+
+	deepEqual(new Item.List(items).serialize(), [
+		{ isPrimary: false },
+		{ isPrimary: false },
+		{ isPrimary: true }
+	]);
+});
+
+/*
+  again, believe this is failing do to issue #1566 with {{#each}} helper
+*/
+QUnit.skip('{{@index}} is updated for "move" events (#1962)', function () {
+	var list = new DefineList([100, 200, 300]);
+	list.set('comparator', function (a, b) { return a < b ? -1 : 1; });
+
+	var template = stache('<ul>{{#each list}}<li>' +
+			'<span class="index">{{@index}}</span> - ' +
+			'<span class="value">{{.}}</span>' +
+		'</li>{{/each}}</ul>');
+
+	var frag = template({ list: list });
+	var expected;
+
+	var evaluate = function () {
+		var liEls = frag.querySelectorAll('li');
+
+		for (var i = 0; i < expected.length; i++) {
+			var li = liEls[i];
+			var index = li.querySelectorAll('.index')[0].innerHTML;
+			var value = li.querySelectorAll('.value')[0].innerHTML;
+
+			equal(index, ''+i, '{{@index}} rendered correct value');
+			equal(value, ''+expected[i], '{{.}} rendered correct value');
+		}
+	};
+  
+  expected = [100, 200, 300];
+	evaluate();
+
+	list.attr('comparator', function (a, b) { return a < b ? 1 : -1; });
+
+	expected = [300, 200, 100];
+	evaluate();
+});
+
+test(".sort(comparatorFn) is passed list items regardless of .attr('comparator') value (#2159)", function () {
+	var list = new DefineList([
+		{ letter: 'x', number: 3 },
+		{ letter: 'y', number: 2 },
+		{ letter: 'z', number: 1 },
+	]);
+
+	list.set('comparator', 'number');
+
+	equal(list[0].number, 1, 'First value is correct');
+	equal(list[1].number, 2, 'Second value is correct');
+	equal(list[2].number, 3, 'Third value is correct');
+
+	list.sort(function (a, b) {
+		a = a.letter;
+		b = b.letter;
+		return (a === b) ? 0 : (a < b) ? -1 : 1;
+	});
+
+	equal(list[0].letter, 'x',
+		'First value is correct after sort with single use comparator');
+	equal(list[1].letter, 'y',
+		'Second value is correct after sort with single use comparator');
+	equal(list[2].letter, 'z',
+		'Third value is correct after sort with single use comparator');
+});
+
+test("List is not sorted on change after calling .sort(fn)", function () {
+	var list = new DefineList([
+		{ letter: 'x', number: 3 },
+		{ letter: 'y', number: 2 },
+		{ letter: 'z', number: 1 },
+	]);
+
+	list.sort(function (a, b) {
+		a = a.letter;
+		b = b.letter;
+		return (a === b) ? 0 : (a < b) ? -1 : 1;
+	});
+
+	equal(list[0].letter, 'x',
+		'First value is correct after sort with single use comparator');
+	equal(list[1].letter, 'y',
+		'Second value is correct after sort with single use comparator');
+	equal(list[2].letter, 'z',
+		'Third value is correct after sort with single use comparator');
+
+	list.sort = function () {
+		ok(false, 'The list is not sorted as a result of change');
+	};
+
+	list[2].letter = 'a';
+
+	equal(list[0].letter, 'x','First value is still correct');
+	equal(list[1].letter, 'y', 'Second value is still correct');
+	equal(list[2].letter, 'a', 'Third value is correctly out of place');
+});
+
+test('Sort returns a reference to the list', 2, function () {
+	var list = new DefineList([{
+		priority: 4,
+		name: 'low'
+	}, {
+		priority: 1,
+		name: 'high'
+	}, {
+		priority: 2,
+		name: 'middle'
+	}, {
+		priority: 3,
+		name: 'mid'
+	}]);
+	var sortFn = function (a, b) {
+		// Sort functions always need to return the -1/0/1 integers
+		if (a.priority < b.priority) {
+			return -1;
+		}
+		return a.priority > b.priority ? 1 : 0;
+	};
+
+	var referenceOne = list.sort(sortFn);
+	equal(referenceOne, list, 'makeMoveFromPatch returns a reference to the list');
+	var referenceTwo = list.sort(sortFn);
+	equal(referenceTwo, list, 'skipping makeMoveFromPatch returns a reference to the list');
 });

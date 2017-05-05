@@ -1,39 +1,31 @@
 var DefineList = require('can-define/list/list');
 var assign = require('can-util/js/assign/assign');
 var each = require('can-util/js/each/each');
-//adding new item after setting comparator
 
 var proto =  DefineList.prototype;
 var setup = proto.setup;
 var comparatorSetup = false;
 var lastComparator = null;
+var shouldSort = false;
 
-/*
-Recognizes when comparator is added
-Recognizes when comparator is changed
-Sorts when items are added
-Sorts when items are removed
-Sorts when comparator value on item is changed.
-*/
-
-//DEFINITELY WORK ON REFACTORING THIS
-
-// simple example so far 
-// I'm going to try to make the code simpler
-// I'm going to try to make the code shorter
-
-//are there negative implications for implementing it this way?
 assign(proto, {
 	setup () {
 		setup.apply(this, arguments);
 		this.on('comparator', this.comparatorEventHandler);
 	},
 	sort (singleComparator) {
+    // setting this flag in case someone pushes without
+    // calling sort or setting comparator
+    shouldSort = true;
 		this.comparator = singleComparator;
 		var sorted = this._getSortedArray(Array.from(this));
 		this._sortDefineList(sorted);
+    return this;
 	},
 	comparatorEventHandler () {
+    // setting this flag in case someone pushes without
+    // calling sort or setting comparator
+    shouldSort = true;
 		//if there is no comparator then set one up
 		if (!comparatorSetup) {
 			comparatorSetup = true;
@@ -92,9 +84,12 @@ assign(proto, {
 		newPos = sorted.findIndex(function(item){
 			return item === currentItem;
 		});
-		this._sortDefineList(sorted);
-		// this is the list
-		this.dispatch('move', [currentItem, newPos, oldPos]);	
+
+    if(newPos !== oldPos) {
+      this._sortDefineList(sorted);
+      // this is the list
+      this.dispatch('move', [currentItem, newPos, oldPos]);	
+    }
 	},
 	_getSortedArray (array) {
 		var comparator;
@@ -223,9 +218,7 @@ each({
 	// `name` - The method name.
 	// `where` - Where items in the `array` should be added.
 	function(where, name) {
-		var orig = [][name];
 		DefineList.prototype[name] = function() {
-			if (this.comparator && arguments.length) {
 				// Get the items being added
 				var args = Array.from(arguments);
 				var length = args.length;
@@ -255,8 +248,9 @@ each({
 					// NOTE: On ultra-big lists, this will be the slowest
 					// part of an "add" because `.splice()` is O(n)
 					// Array.prototype.splice.apply(this, [correctIndex, 0, val]);
-
-					this._sortDefineList(sorted);
+          if (shouldSort) {
+					  this._sortDefineList(sorted);
+          }
 
 					// Render, etc
 					this._triggerChange('' + newIndex, 'add', [val], undefined);
@@ -269,10 +263,6 @@ each({
 				this.dispatch('reset', [args]);
 
 				return this;
-			} else {
-				// Call the original method
-				return orig.apply(this, arguments);
-			}
 		};
 	});
 
